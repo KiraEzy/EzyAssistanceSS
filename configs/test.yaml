@@ -1,0 +1,7 @@
+- LevelAutomation:
+    EXP_08:
+      characters: ''
+      isAuto: false
+      isFreeAuto: false
+- Material_Mission:
+    mission: EXP_08

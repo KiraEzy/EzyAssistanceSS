@@ -1,0 +1,42 @@
+- LevelAutomation:
+    EXP_08:
+      characters: ''
+      isAuto: true
+      isFreeAuto: false
+    EXP_09:
+      characters: "\u9ECE\u660E\u4F8D\u5973 \"\u9EEF\u5FC3\",\u5149\u8F1D\u4F8D\u5973\
+        \ \"\u5929\u4F7F\",\u69CD\u9A0E\u571F\"\u6012\u98A8\""
+      isAuto: true
+      isFreeAuto: false
+    EXP_09_1:
+      characters: "\u9ECE\u660E\u4F8D\u5973 \"\u9EEF\u5FC3\",\u5149\u8F1D\u4F8D\u5973\
+        \ \"\u5929\u4F7F\",\u69CD\u9A0E\u571F\"\u6012\u98A8\""
+      isAuto: true
+      isFreeAuto: false
+    EXP_09_2:
+      characters: "\u9ECE\u660E\u4F8D\u5973 \"\u9EEF\u5FC3\",\u5149\u8F1D\u4F8D\u5973\
+        \ \"\u5929\u4F7F\",\u69CD\u9A0E\u571F\"\u6012\u98A8\""
+      isAuto: true
+      isFreeAuto: false
+    EXP_09_3:
+      characters: "\u9ECE\u660E\u4F8D\u5973 \"\u9EEF\u5FC3\",\u5149\u8F1D\u4F8D\u5973\
+        \ \"\u5929\u4F7F\",\u69CD\u9A0E\u571F\"\u6012\u98A8\""
+      isAuto: true
+      isFreeAuto: false
+    EXP_09_4:
+      characters: "\u9ECE\u660E\u4F8D\u5973 \"\u9EEF\u5FC3\",\u5149\u8F1D\u4F8D\u5973\
+        \ \"\u5929\u4F7F\",\u69CD\u9A0E\u571F\"\u6012\u98A8\""
+      isAuto: true
+      isFreeAuto: false
+    EXP_09_5:
+      characters: "\u9ECE\u660E\u4F8D\u5973 \"\u9EEF\u5FC3\",\u5149\u8F1D\u4F8D\u5973\
+        \ \"\u5929\u4F7F\",\u69CD\u9A0E\u571F\"\u6012\u98A8\""
+      isAuto: true
+      isFreeAuto: false
+    EXP_09_6:
+      characters: "\u9ECE\u660E\u4F8D\u5973 \"\u9EEF\u5FC3\",\u5149\u8F1D\u4F8D\u5973\
+        \ \"\u5929\u4F7F\",\u69CD\u9A0E\u571F\"\u6012\u98A8\""
+      isAuto: true
+      isFreeAuto: false
+- Material_Mission:
+    mission: EXP_08,EXP_09,EXP_09,EXP_09,EXP_09,EXP_09,EXP_09,EXP_09

@@ -1,0 +1,14 @@
+C:\Github\OctoPilot\trainingData\4e364635cca55f64b29aaf587928bfea.jpg	1
+C:\Github\OctoPilot\trainingData\75d7eef16f6909b9a66441d3ee2624f7.jpg	1
+C:\Github\OctoPilot\trainingData\87b0fe03a9ad32ba8291f188357e1e29.jpg	1
+C:\Github\OctoPilot\trainingData\a716fd6bab0f2e3ce62637847c14daec.jpg	1
+C:\Github\OctoPilot\trainingData\d3da5fc6ce33b33ff15bc13aa94e57c1.jpg	1
+C:\Github\OctoPilot\trainingData\f3f785ea43cd2bb7d1945fb417f6a4b3.jpg	1
+C:\Github\OctoPilot\trainingData\ScrollCharacter0.png	1
+C:\Github\OctoPilot\trainingData\ScrollCharacter1.png	1
+C:\Github\OctoPilot\trainingData\ScrollCharacter2.png	1
+C:\Github\OctoPilot\trainingData\ScrollCharacter3.png	1
+C:\Github\OctoPilot\trainingData\ScrollCharacter4.png	1
+C:\Github\OctoPilot\trainingData\ScrollCharacter5.png	1
+C:\Github\OctoPilot\trainingData\ScrollCharacter6.png	1
+C:\Github\OctoPilot\trainingData\ScrollCharacter7.png	1

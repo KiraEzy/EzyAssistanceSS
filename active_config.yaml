@@ -1,0 +1,35 @@
+- LevelAutomation:
+    EXP_10:
+      characters: ''
+      isAuto: false
+      isFreeAuto: false
+    EXP_10_1:
+      characters: ''
+      isAuto: false
+      isFreeAuto: false
+    EXP_10_2:
+      characters: ''
+      isAuto: false
+      isFreeAuto: false
+    EXP_10_3:
+      characters: ''
+      isAuto: false
+      isFreeAuto: false
+    EXP_10_4:
+      characters: ''
+      isAuto: false
+      isFreeAuto: false
+    EXP_10_5:
+      characters: ''
+      isAuto: false
+      isFreeAuto: false
+    EXP_10_6:
+      characters: ''
+      isAuto: false
+      isFreeAuto: false
+    EXP_10_7:
+      characters: ''
+      isAuto: false
+      isFreeAuto: false
+- Material_Mission:
+    mission: EXP_10,EXP_10,EXP_10,EXP_10,EXP_10,EXP_10,EXP_10,EXP_10

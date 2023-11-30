@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eel Example</title>
+    <script type="text/javascript" src="/eel.js"></script>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <button onclick="say_hello()">Say Hello</button>
+    <script>
+        function say_hello() {
+            eel.print_test("message from")(function(result) {
+                alert(result);
+            });
+        }
+    </script>
+</body>
+</html>
