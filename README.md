@@ -22,3 +22,4 @@ pip install -r requirements.txt
 ## 貢獻
 
 歡迎提出Pull Request。對於重大更改，請先開啟一個Issue以討論您想要進行的更改。
+如有更多問題，聯繫line id：dkm_ezy QQ ID: 3538564978
