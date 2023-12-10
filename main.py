@@ -1,7 +1,10 @@
+import ast
 import asyncio
 import configparser
 import copy
 import glob
+import io
+import logging
 import os
 import random
 import string
@@ -9,6 +12,9 @@ import sys
 import threading
 import time
 from random import choices
+
+from EASLogger import EASloggerSingleton
+from workflow.ReceiveReward import receiveReward
 from workflow.StartApp import StartApp, runStartApp
 from workflow.MainMaterial import mainMaterial
 
@@ -21,7 +27,7 @@ from PySide6.QtGui import Qt, QIcon
 
 import ADBClass
 import numpy as np
-from PySide6.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject, QThread
+from PySide6.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject, QThread, QTimer
 from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QPushButton, \
     QPlainTextEdit, QTextEdit, QHBoxLayout, QLineEdit, QCheckBox, QSizePolicy
 from cnocr import CnOcr
@@ -30,6 +36,8 @@ import OctoUtil
 from Flows.TestFlow import StartAppFlow, TestFlowOcto, DailyMaterialFlow
 from adb_profile import Adb_profile
 from paddleocr import PaddleOCR,draw_ocr
+
+from workflow.WeekTower import weeklyTower
 
 sys.argv += ['-platform', 'windows:darkmode=2']
 
@@ -222,14 +230,48 @@ class FlowThread(QThread):
             fw.run()
         self.finished.emit()
 
+class Monitor:
+    def __init__(self, filename, last_read_ptr=0):
+        self.filename = filename
+        self.last_read_ptr = last_read_ptr
+
+    def check(self):
+        with open("./logs/log_test.txt") as f:
+            f.seek(0, 2)
+            f.seek(max(self.last_read_ptr, 0), 0)  # Move file pointer to the end of the file
+
+            content_lines = f.read().split("\n")
+            new_content = ""
+            for line in content_lines:
+                if line != "":
+                    new_content += ast.literal_eval(line).decode()
+                    if line != content_lines[-2]:
+                        new_content += '\n'
+
+            self.last_read_ptr = f.tell()  # Save the current position of the file pointer
+            return (new_content, self.last_read_ptr)
+
+        # with open("./logs/log_test.txt", "rb") as f:
+        #     new_content = ast.literal_eval(f.read()).decode()
+        #     f.seek(0, 2)
+        #     f.seek(max(self.last_read_ptr, 0), 0)  # Move file pointer to the end of the file
+        #     self.last_read_ptr = f.tell()  # Save the current position of the file pointer
+        #     return (new_content, self.last_read_ptr)
+
 class OctoUI(QtWidgets.QMainWindow):
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("MAA - 鈴蘭之劍")
         self.selectedFiles = []
         self.setMinimumSize(1200, 800)
         self.runProg = True
+        self.lastReadPtr = 0
         self.editingMission = scheduleMission.UIInit(None)
+
+
+
+
         # Create tabs
         self.recList = [[],[]]
         self.scheduleMissionList = []
@@ -278,6 +320,7 @@ class OctoUI(QtWidgets.QMainWindow):
         self.lineEditsScrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.lineEditsScrollArea.setWidgetResizable(True)
         self.lineEditsScrollArea.setStyleSheet("QWidget {border: 1px solid gray; border-radius: 5px;}")
+
 
         # Create the button to add new QLineEdit widgets
         self.addButton = QtWidgets.QPushButton("Add Model")
@@ -334,11 +377,22 @@ class OctoUI(QtWidgets.QMainWindow):
         self.farmResOptionLayout.addStretch()
         self.farmResOptionLayout.addWidget(self.farmResSetting)
 
+        self.receiveRewardOptionWidget = QtWidgets.QWidget()
+        self.receiveRewardOptionLayout = QtWidgets.QHBoxLayout(self.receiveRewardOptionWidget)
+        self.receiveRewardOptionLayout.setAlignment(QtCore.Qt.AlignTop)
+
+        self.receiveRewardCheckbox = QCheckBox('Receive Reward', self)
+        self.receiveRewardSetting = QtWidgets.QPushButton("Settings")
+
+        self.receiveRewardOptionLayout.addWidget(self.receiveRewardCheckbox)
+        self.receiveRewardOptionLayout.addStretch()
+        self.receiveRewardOptionLayout.addWidget(self.receiveRewardSetting)
+
         self.taskBox = QtWidgets.QGroupBox()
         self.taskBox.setStyleSheet("QGroupBox {border: 1px solid gray; border-radius: 5px; padding: 20px; margin:50px; margin-right: 0px; margin-left: 20px;}")
 
         self.StartBtn = QtWidgets.QPushButton("Link Start")
-        self.StartBtn.connect(self.StartBtn, QtCore.SIGNAL("clicked()"), lambda: self.startMainFlow([self.startAppCheckbox.isChecked(), self.farmResCheckbox.isChecked()]))
+        self.StartBtn.connect(self.StartBtn, QtCore.SIGNAL("clicked()"), lambda: self.startMainFlow([self.startAppCheckbox.isChecked(), self.farmResCheckbox.isChecked(), self.receiveRewardCheckbox.isChecked()]))
 
         self.StopBtn = QtWidgets.QPushButton("Link Stop")
         self.StopBtn.connect(self.StopBtn, QtCore.SIGNAL("clicked()"), lambda: self.stopMainFlow())
@@ -349,6 +403,7 @@ class OctoUI(QtWidgets.QMainWindow):
         self.taskLabelLayout = QtWidgets.QVBoxLayout(self.taskBox)
         self.taskLabelLayout.addWidget(self.startAppOptionWidget)
         self.taskLabelLayout.addWidget(self.farmResOptionWidget)
+        self.taskLabelLayout.addWidget(self.receiveRewardOptionWidget)
         self.taskLabelLayout.addStretch()
         self.taskLabelLayout.addWidget(self.StartBtn)
         self.taskLabelLayout.addWidget(self.StopBtn)
@@ -398,6 +453,11 @@ class OctoUI(QtWidgets.QMainWindow):
         # self.recordingScrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.recordingScrollArea.setWidgetResizable(True)
         self.recordingScrollArea.setStyleSheet("QWidget {border: 1px solid gray; border-radius: 5px;}")
+
+        self.logText = QtWidgets.QTextEdit()
+        self.logText.setReadOnly(True)
+        self.logText.setText("")
+        self.streamerDisplayVbox.addWidget(self.logText)
         # Add Bordered Textbox to Right Panel
         self.rightPanel.addWidget(self.recordingScrollArea, 1)
 
@@ -733,6 +793,19 @@ class OctoUI(QtWidgets.QMainWindow):
         self.timer = QtCore.QTimer()
         self.timer.start(1000)
 
+        self.timer_log = QTimer()
+        self.timer_log.timeout.connect(self.monitor_log)
+        self.timer_log.start(1000)  # 1000 milliseconds = 1 second
+
+    def monitor_log(self):
+        file_path = 'logs\\log_test.txt'
+        monitor = Monitor(file_path, self.lastReadPtr)
+        newText = monitor.check()
+        self.lastReadPtr = newText[1]
+        if len(newText[0]) > 0:
+            self.logText.append(newText[0])
+            print("".join(newText[0]))
+
     def initMissionCheckRepeated(self, config_data, missionId, past_mission):
         for mission in list(config_data[0]['LevelAutomation'].keys()):
             if (missionId in mission) and (mission not in past_mission):
@@ -897,6 +970,10 @@ class OctoUI(QtWidgets.QMainWindow):
             mainMaterialWf = mainMaterial(self.adbDirTextEdit.text(),self.connectionPortTextEdit.text())
             # StartAppWf = StartAppFlow(self.adbDirTextEdit.text(), self.connectionPortTextEdit.text())
             self.MainFlow.append(mainMaterialWf)
+        if taskCheckBoxArray[2]:
+            receiveRewardWf = receiveReward(self.adbDirTextEdit.text(),self.connectionPortTextEdit.text())
+            # StartAppWf = StartAppFlow(self.adbDirTextEdit.text(), self.connectionPortTextEdit.text())
+            self.MainFlow.append(receiveRewardWf)
         return self.MainFlow
 
     def applySettingAction(self):
@@ -1302,9 +1379,21 @@ class OctoUI(QtWidgets.QMainWindow):
 #     ADBClass.AdbSingleton.getInstance().screen_capture(f'./trainingData/ScrollCharacter{i}.png')
 #     time.sleep(5)
 
-# mainMaterialFlow = mainMaterial(adb_path="D:\\mumu2\\emulator\\nemu\\vmonitor\\bin\\adb_server.exe", adb_port="127.0.0.1:7555")
-# mainMaterialFlow.run()
+# MatF = mainMaterial(adb_path="D:\\mumu2\\emulator\\nemu\\vmonitor\\bin\\adb_server.exe", adb_port="127.0.0.1:7555")
+# MatF.run()
+# logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
+# logging.debug('This message should go to the log file')
+# logging.info('So should this')
+# logging.warning('And this, too')
+# logging.error('And non-ASCII stuff, too, like Øresund and Malmö')
+# SAFlow = runStartApp(adb_path="D:\\mumu2\\emulator\\nemu\\vmonitor\\bin\\adb_server.exe", adb_port="127.0.0.1:7555")
+# SAFlow.run()
 
+# RAFlow = receiveReward(adb_path="D:\\mumu2\\emulator\\nemu\\vmonitor\\bin\\adb_server.exe", adb_port="127.0.0.1:7555")
+# RAFlow.run()
+
+# WTFlow = weeklyTower(adb_path="D:\\mumu2\\emulator\\nemu\\vmonitor\\bin\\adb_server.exe", adb_port="127.0.0.1:7555")
+# WTFlow.run()
 
 # left = 970
 # top = 554
@@ -1317,6 +1406,7 @@ class OctoUI(QtWidgets.QMainWindow):
 #         print(config_data[4]["missioninfo"][0]["name"])
 # OctoUtil.OctoUtil.check_pixel_color('./img/startMission.png', 751,35, (132,202,124,255))
 # print(m_profile.screen_capture("./img/screenshot.png"))
+# EASloggerSingleton.getInstance().info('./logs/log_test.txt', "正在連接模擬器")
 
 
 

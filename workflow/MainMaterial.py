@@ -12,7 +12,7 @@ import ADBClass
 import numpy as np
 from PIL import ImageChops
 
-
+from EASLogger import EASloggerSingleton
 
 
 class mainMaterial:
@@ -513,12 +513,22 @@ class mainMaterial:
     def run(self):
         adb_is_connected = ADBClass.AdbSingleton.getInstance().connectDevice(adb_path=self.adb_path, adb_port=self.adb_port,
                                                                 retryCount=20)
-
+        EASloggerSingleton.getInstance().info('./logs/log_test.txt', "開始刷圖")
         missionList = self.getMissionListFromConfig()
         with open('active_config.yaml', 'r') as file:
             config_data = yaml.safe_load(file)
             missionActiveNameList = list(config_data[0]['LevelAutomation'].keys())
         for index, mission in enumerate(missionList):
+            loggingString = "刷圖: " + missionActiveNameList[index]
+            if config_data[0]['LevelAutomation'][missionActiveNameList[index]]['isAuto'] is True:
+                loggingString += " (自動)"
+                loggingString += " | " + config_data[0]['LevelAutomation'][missionActiveNameList[index]]['characters']
+                if config_data[0]['LevelAutomation'][missionActiveNameList[index]]['isFreeAuto'] is True:
+                    loggingString += " (章魚罐頭)"
+            else:
+                loggingString += " (手動)"
+
+            EASloggerSingleton.getInstance().info('./logs/log_test.txt', loggingString)
             missionActiveName = missionActiveNameList[index]
             missionStatus = self.mapMissionToStatus(index, mission)
             print("mission status: ", missionStatus)
@@ -541,6 +551,8 @@ class mainMaterial:
                     startMissionRes = self.startMissionAuto(missionStatus, missionActiveName)
                 elif missionStatus[0] == "DailyMaterialFight":
                     startMissionRes = self.startMissionFight()
+                    loggingString = "結束刷圖: " + missionActiveNameList[index] + " (手動)" + " | " + "已開始行動" + str(index) + "次"
+                    EASloggerSingleton.getInstance().info('./logs/log_test.txt', loggingString)
         # ADBClass.AdbSingleton.getInstance().screen_capture("loginCapture.png")
 
         return input

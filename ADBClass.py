@@ -3,6 +3,8 @@ import os
 import cv2
 import subprocess
 
+from EASLogger import EASloggerSingleton
+
 
 class AdbSingleton:
     instance = None
@@ -24,6 +26,8 @@ class AdbSingleton:
 
     def connectDevice(self, adb_path='', adb_port='', retryCount=5):
         print("connectDevice", adb_path, adb_port, retryCount)
+
+        EASloggerSingleton.getInstance().info('./logs/log_test.txt', "正在連接模擬器")
         if adb_path != self.adb_path:
             self.adb_path = adb_path
         if adb_port != self.adb_port:

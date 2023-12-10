@@ -1,5 +1,7 @@
+import math
 import os
 import re
+import time
 
 import cv2
 import numpy as np
@@ -238,3 +240,64 @@ class OctoUtil:
                 data[1]['Material_Mission']['mission'] += str(missionListStr)
             with open(fileName, 'w') as file:
                 yaml.dump(data, file)
+
+    @staticmethod
+    def cv2CheckImgExist(patternPath, screenshotPath, isSingle=True, needScreenShot=False):
+        if needScreenShot:
+            ADBClass.AdbSingleton.getInstance().screen_capture(screenshotPath)
+        screenshot = cv2.imread(screenshotPath, 0)
+        pattern = cv2.imread(patternPath, 0)
+        result = cv2.matchTemplate(pattern, screenshot, cv2.TM_CCOEFF_NORMED)
+        threshold = 0.8
+
+        # Find the location of matched regions above the threshold
+        locations = np.where(result >= threshold)
+
+        # Draw rectangles around the matched regions
+        # for pt in zip(*locations[::-1]):
+        #     cv2.rectangle(screenshot, pt, (pt[0] + pattern.shape[1], pt[1] + pattern.shape[0]), (255, 255, 0), 2)
+        #
+        # cv2.imshow('Result', screenshot)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        # Display the result
+        # cv2.imshow('Result', screenshot)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        if isSingle:
+            if len(locations[0]) > 0:
+                x, y = locations[::-1]
+                w, h = pattern.shape[::-1]
+                return (x[0] + w / 2, y[0] + h / 2)
+            else:
+                return None
+        else:
+            if len(locations[0]) > 0:
+                x, y = locations[::-1]
+                w, h = pattern.shape[::-1]
+                xi = x[0]
+                yi = y[0]
+                resArr = []
+                # loop for locations items times
+                for i in range(len(locations[0])):
+                    isTooClose = False
+                    for coord in resArr:
+                        currCoord = (x[i], y[i])
+                        dist = math.dist(coord, currCoord)
+                        if dist < 50:
+                            isTooClose = True
+                            break
+                    if not isTooClose:
+                        resArr.append((x[i] + w / 2, y[i] + h / 2))
+                return resArr
+            else:
+                return None
+
+    @staticmethod
+    def backToMainScreen():
+        while OctoUtil.cv2CheckImgExist('./Icons/loggedInCheckImg.png', './img/levelCapture.png', needScreenShot=True) is None:
+            res = OctoUtil.cv2CheckImgExist('./Icons/backButton.png', './img/levelCapture.png')
+            if res is not None:
+                ADBClass.AdbSingleton.getInstance().tap(res)
+                time.sleep(1)
+

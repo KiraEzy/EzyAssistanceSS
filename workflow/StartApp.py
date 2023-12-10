@@ -1,9 +1,11 @@
+import logging
 import time
 
 import cv2
 import numpy as np
 
 import ADBClass
+from EASLogger import EASloggerSingleton
 from OctoUtil import OctoUtil
 
 
@@ -43,7 +45,10 @@ class screenshot_cv2_match_template_login:
         self.retry_count = retry_count
         self.subpattern = subpattern
         self.current_stage = current_stage
+
     def run(self):
+
+
         isValid = False
         tap_pos = (0, 0)
         cv2_img_screenshot_rect = (0, 0, 0, 0)
@@ -164,6 +169,14 @@ class runStartApp:
         self.adb_port = adb_port
         self.currentStage = 0
     def run(self):
+        # logging.basicConfig(filename='../logs/log_test.txt',
+        #                     filemode='a',
+        #                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+        #                     datefmt='%H:%M:%S',
+        #                     level=logging.DEBUG)
+
+        EASloggerSingleton.getInstance().info('./logs/log_test.txt', "開始喚醒")
+
         adb_is_connected = ADBClass.AdbSingleton.getInstance().connectDevice(adb_path=self.adb_path, adb_port=self.adb_port,
                                                                 retryCount=20)
         SetupAdbFlow = SetupAdb(adb_path=self.adb_path, adb_port=self.adb_port, retry_count=5)
@@ -214,3 +227,4 @@ class runStartApp:
             time.sleep(10)
             loginRewardFlow = loginReward()
             loginRewardFlow.run()
+            EASloggerSingleton.getInstance().info('./logs/log_test.txt', "喚醒完畢")
