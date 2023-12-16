@@ -30,7 +30,6 @@ import numpy as np
 from PySide6.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject, QThread, QTimer
 from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QPushButton, \
     QPlainTextEdit, QTextEdit, QHBoxLayout, QLineEdit, QCheckBox, QSizePolicy
-from cnocr import CnOcr
 import OCRClass
 import OctoUtil
 from Flows.TestFlow import StartAppFlow, TestFlowOcto, DailyMaterialFlow
