@@ -82,7 +82,7 @@ class getCurrentProgress:
         im.save('./img/weeklyTower.png')
         im.close()
 
-        res = OCRClass.PaddleOCRSingleton.getInstance().scanText('./img/weeklyTower.png')
+        res = OCRClass.OCRSingleton.getInstance().scanText('./img/weeklyTower.png')
         print(res)
         # the result is [1-10]/10, and i only want to extract the first number
         res = re.findall(r'\d+', res[0][0])

@@ -279,13 +279,13 @@ class mainMaterial:
 
         # Save the cropped image
         cropped_image.save("./img/gotoDifficultyStepCroppedScreenshot.png")
-        scanRes = OCRClass.PaddleOCRSingleton.getInstance().scanText('./img/gotoDifficultyStepCroppedScreenshot.png')
+        scanRes = OCRClass.OCRSingleton.getInstance().scanText('./img/gotoDifficultyStepCroppedScreenshot.png')
         # scanRes = OCRClass.OCRSingleton.getInstance().scanText('./img/gotoDifficultyStepCroppedScreenshot.png')
         print("scanRes: ", scanRes)
 
         for item in scanRes:
             text = item[0]
-            match = re.search(r'關卡(\d+)', text)
+            match = re.search(r'卡(\d+)', text)
             if match:
                 number = int(match.group(1))
                 print(f"Found number: {number}", "||| DestinationPage(2): ", destinationPage[2],
@@ -299,7 +299,7 @@ class mainMaterial:
                     if destDiff > 0:
                         for i in range(destDiff * 2):
                             ADBClass.AdbSingleton.getInstance().tap((400, 390))
-                            time.sleep(0.5)
+                            time.sleep(1)
                     else:
                         return ("error", "difficulty locked")
                     # Check Arrived
@@ -320,13 +320,13 @@ class mainMaterial:
 
                     # Save the cropped image
                     cropped_image.save("./img/gotoDifficultyStepCroppedScreenshot.png")
-                    scanRes = OCRClass.PaddleOCRSingleton.getInstance().scanText(
+                    scanRes = OCRClass.OCRSingleton.getInstance().scanText(
                         './img/gotoDifficultyStepCroppedScreenshot.png')
                     print("scanRes: ", scanRes)
 
                     for item in scanRes:
                         text = item[0]
-                        match = re.search(r'關卡(\d+)', text)
+                        match = re.search(r'卡(\d+)', text)
                         if match:
                             return "ARRIVED"
             else:

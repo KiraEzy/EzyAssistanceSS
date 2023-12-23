@@ -13,15 +13,14 @@ import threading
 import time
 from random import choices
 
+from PIL import Image
+
 from EASLogger import EASloggerSingleton
 from workflow.ReceiveReward import receiveReward
 from workflow.StartApp import StartApp, runStartApp
 from workflow.MainMaterial import mainMaterial
 
-import easyocr
-import eel as eel
 import yaml
-from PIL import ImageChops, Image
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import Qt, QIcon
 
@@ -34,8 +33,6 @@ import OCRClass
 import OctoUtil
 from Flows.TestFlow import StartAppFlow, TestFlowOcto, DailyMaterialFlow
 from adb_profile import Adb_profile
-from paddleocr import PaddleOCR,draw_ocr
-
 from workflow.WeekTower import weeklyTower
 
 sys.argv += ['-platform', 'windows:darkmode=2']
@@ -357,8 +354,8 @@ class OctoUI(QtWidgets.QMainWindow):
         self.startAppOptionLayout = QtWidgets.QHBoxLayout(self.startAppOptionWidget)
         self.startAppOptionLayout.setAlignment(QtCore.Qt.AlignTop)
 
-        self.startAppCheckbox = QCheckBox('Start App', self)
-        self.startAppSetting = QtWidgets.QPushButton("Settings")
+        self.startAppCheckbox = QCheckBox('開始喚醒', self)
+        self.startAppSetting = QtWidgets.QPushButton("設定")
 
         self.startAppOptionLayout.addWidget(self.startAppCheckbox)
         self.startAppOptionLayout.addStretch()
@@ -369,8 +366,8 @@ class OctoUI(QtWidgets.QMainWindow):
         self.farmResOptionLayout = QtWidgets.QHBoxLayout(self.farmResOptionWidget)
         self.farmResOptionLayout.setAlignment(QtCore.Qt.AlignTop)
 
-        self.farmResCheckbox = QCheckBox('Farm Resources', self)
-        self.farmResSetting = QtWidgets.QPushButton("Settings")
+        self.farmResCheckbox = QCheckBox('自動刷圖', self)
+        self.farmResSetting = QtWidgets.QPushButton("設定")
 
         self.farmResOptionLayout.addWidget(self.farmResCheckbox)
         self.farmResOptionLayout.addStretch()
@@ -380,8 +377,8 @@ class OctoUI(QtWidgets.QMainWindow):
         self.receiveRewardOptionLayout = QtWidgets.QHBoxLayout(self.receiveRewardOptionWidget)
         self.receiveRewardOptionLayout.setAlignment(QtCore.Qt.AlignTop)
 
-        self.receiveRewardCheckbox = QCheckBox('Receive Reward', self)
-        self.receiveRewardSetting = QtWidgets.QPushButton("Settings")
+        self.receiveRewardCheckbox = QCheckBox('領取獎勵', self)
+        self.receiveRewardSetting = QtWidgets.QPushButton("設定")
 
         self.receiveRewardOptionLayout.addWidget(self.receiveRewardCheckbox)
         self.receiveRewardOptionLayout.addStretch()
@@ -390,10 +387,10 @@ class OctoUI(QtWidgets.QMainWindow):
         self.taskBox = QtWidgets.QGroupBox()
         self.taskBox.setStyleSheet("QGroupBox {border: 1px solid gray; border-radius: 5px; padding: 20px; margin:50px; margin-right: 0px; margin-left: 20px;}")
 
-        self.StartBtn = QtWidgets.QPushButton("Link Start")
+        self.StartBtn = QtWidgets.QPushButton("啟動")
         self.StartBtn.connect(self.StartBtn, QtCore.SIGNAL("clicked()"), lambda: self.startMainFlow([self.startAppCheckbox.isChecked(), self.farmResCheckbox.isChecked(), self.receiveRewardCheckbox.isChecked()]))
 
-        self.StopBtn = QtWidgets.QPushButton("Link Stop")
+        self.StopBtn = QtWidgets.QPushButton("停止")
         self.StopBtn.connect(self.StopBtn, QtCore.SIGNAL("clicked()"), lambda: self.stopMainFlow())
         # self.startButton.connect()
 
@@ -484,25 +481,25 @@ class OctoUI(QtWidgets.QMainWindow):
         self.flineEditsScrollArea.setWidgetResizable(True)
         self.flineEditsScrollArea.setStyleSheet("QWidget {border: 1px solid gray; border-radius: 5px;}")
 
-        self.saveSettingBtn = QtWidgets.QPushButton("Save File")
+        self.saveSettingBtn = QtWidgets.QPushButton("儲存檔案")
         self.saveSettingBtn.clicked.connect(
             lambda: self.save_preset(self.missionPresetDropdown.currentText())
         )
 
-        self.loadSettingBtn = QtWidgets.QPushButton("Load File")
+        self.loadSettingBtn = QtWidgets.QPushButton("加載檔案")
         self.loadSettingBtn.clicked.connect(
             lambda: self.onLoadMissionPreset(self.missionPresetDropdown.currentText())
         )
 
         # self.fAddButton.clicked.connect(self.add_empty_mission)
 
-        self.fAddButton = QtWidgets.QPushButton("Add Mission")
+        self.fAddButton = QtWidgets.QPushButton("新增任務")
         self.fAddButton.clicked.connect(self.add_empty_mission)
 
-        self.missionRemoveButton = QtWidgets.QPushButton("Remove Selection")
+        self.missionRemoveButton = QtWidgets.QPushButton("刪除任務")
         self.missionRemoveButton.connect(self.missionRemoveButton, QtCore.SIGNAL("clicked()"), self.remove_missions)
         # --------------------------------------------------------------------------------------------------------------
-        self.newPresetButton = QtWidgets.QPushButton("Save As")
+        self.newPresetButton = QtWidgets.QPushButton("另存為")
 
         self.newPresetTextEdit = QtWidgets.QLineEdit()
 
@@ -533,7 +530,7 @@ class OctoUI(QtWidgets.QMainWindow):
         self.missionPresetDropdownLayout.addWidget(self.missionPresetDropdown)
         # --------------------------------------------------------------------------------------------------------------
 
-        self.missionSaveButton = QtWidgets.QPushButton("Apply Missions Schedule")
+        self.missionSaveButton = QtWidgets.QPushButton("啟用當前流程")
         self.missionSaveButton.connect(self.missionSaveButton, QtCore.SIGNAL("clicked()"), self.save_missions)
 
         self.missionSettingSLWidget = QtWidgets.QWidget()
@@ -775,16 +772,16 @@ class OctoUI(QtWidgets.QMainWindow):
         self.tabSettingLayout.addLayout(self.tabFormLayout)
         self.tabSettingLayout.addLayout(self.settingActionRow)
         # Add Tab 1 to the tabs
-        self.tabs.addTab(self.tab1, "Recording")
-        self.tabs.addTab(self.fixVideoTabWidget, "Fix Videos")
-        self.tabs.addTab(self.tabSetting, "Setting")
+        self.tabs.addTab(self.tab1, "一鍵刷資源")
+        self.tabs.addTab(self.fixVideoTabWidget, "刷圖流程")
+        self.tabs.addTab(self.tabSetting, "設定")
 
 
         # Add tabs to the main window
         self.setCentralWidget(self.tabs)
 
         # Set window properties
-        self.setWindowTitle("OctoPilot")
+        self.setWindowTitle("MAA Assistance SS - 鈴蘭之劍")
         self.setGeometry(100, 100, 800, 600)
 
         self.initMissions()
@@ -933,6 +930,14 @@ class OctoUI(QtWidgets.QMainWindow):
         # Print the result to the console
         print("completedFlow")
     def startMainFlow(self, taskCheckBoxArray):
+
+        file_path = 'logs\\log_test.txt'
+
+        # Open the file in write mode
+        with open(file_path, 'w') as file:
+            # Use the truncate() method to clear the file content
+            file.truncate(0)
+
         thread_pool = QThreadPool.globalInstance()
         thread_pool.setMaxThreadCount(1)
         self.thread_pool = []
@@ -1407,8 +1412,12 @@ class OctoUI(QtWidgets.QMainWindow):
 # print(m_profile.screen_capture("./img/screenshot.png"))
 # EASloggerSingleton.getInstance().info('./logs/log_test.txt', "正在連接模擬器")
 
+log_path = 'logs\\log_test.txt'
 
-
+    # Open the file in write mode
+with open(log_path, 'w') as file:
+    # Use the truncate() method to clear the file content
+    file.truncate(0)
 
 app = QtWidgets.QApplication([])
 app.setStyle('Fusion')

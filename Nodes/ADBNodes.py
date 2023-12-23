@@ -511,7 +511,7 @@ class DailyMaterialNode(BaseNode):
 
         # Save the cropped image
         cropped_image.save("./img/gotoDifficultyStepCroppedScreenshot.png")
-        scanRes = OCRClass.PaddleOCRSingleton.getInstance().scanText('./img/gotoDifficultyStepCroppedScreenshot.png')
+        scanRes = OCRClass.OCRSingleton.getInstance().scanText('./img/gotoDifficultyStepCroppedScreenshot.png')
         # scanRes = OCRClass.OCRSingleton.getInstance().scanText('./img/gotoDifficultyStepCroppedScreenshot.png')
         print("scanRes: ", scanRes)
 
@@ -550,7 +550,7 @@ class DailyMaterialNode(BaseNode):
 
                     # Save the cropped image
                     cropped_image.save("./img/gotoDifficultyStepCroppedScreenshot.png")
-                    scanRes = OCRClass.PaddleOCRSingleton.getInstance().scanText(
+                    scanRes = OCRClass.OCRSingleton.getInstance().scanText(
                         './img/gotoDifficultyStepCroppedScreenshot.png')
                     print("scanRes: ", scanRes)
 
